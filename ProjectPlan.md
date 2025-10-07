@@ -9,7 +9,7 @@ Clearly define team member roles and responsibilities
 
 ## Datasets
 Identify and describe the datasets that you will use. You need to use at least two different datasets that need to be integrated. If you are looking for ideas for datasets to use, please reach out via Campuswire.
-1. Building Permits from Chicago Data Portal
+1. Building Permits from Chicago Data Portal ("https://data.cityofchicago.org/api/v3/views/ydr8-5enu/query.csv")
 2. Building Violations from Chicago Data Portal
 
 ## Timeline
