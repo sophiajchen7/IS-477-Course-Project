@@ -1,7 +1,7 @@
 ## Overview
 The overall goal of this project is to identify, if one exists, between the number of building permits issued and the number of building violations recorded in a given neighborhood or year. By inspecting the relationship between building violations and building permit issuance, we may be able to identify trends in the terms of the permit issuance that may be attributed to building violations. Patterns in permit issuance conditions or status like it being expired, revoked, having unpaid fees, waived fees, type of violation, as well as what neighborhoods and years have similar trends in their violation and permit data on top of other factors may be tellin
 
-## Research Question(s)
+## Research Question
 Is there a relationship between the number of building permits issued and the number of violations recorded in a given neighborhood or year?
 
 ## Team
@@ -19,11 +19,42 @@ This dataset contains the details of all building permits within the City of Chi
 Document the plan and timeline for implementing your project including who will complete each task.
 <img width="700" height="250" alt="image" src="https://github.com/user-attachments/assets/1ead0bb1-601b-4f75-8550-ba22ec9584d3" />
 
+Every step in the timeline will be done with an equal split between Sophia and Samantha.
+
+#### Plan
+- Finalize research question
+- Identify datasets
+- Take a look at ethical and data privacy considerations
+
+#### Acquire
+- Download both datasets either as CSV or through api
+- Store data in organized folders
+
+#### Process
+- Clean missing values, standardize addresses
+- Covenant dates and location fields into consistent formats
+- Assess data quality
+
+#### Analyze
+- Integrate datasets by community area or address
+- Compute metrics
+- Perform exploratory data analysis
+- Test for correlations between the datasets
+
+#### Preserve
+- Keep the repository structured with clear folder organizations
+- Generate data dictionary
+
+#### Publish/Share
+- Write final report
+- Finalize figures and visualizations
+- Tag final release on GitHub
+
 ## Constraints
 1. Missing Fields in Data: Some records have incomplete information such as incomplete addresses or missing fees which requires cleaning and could imit certain analyses.
 2. Challenge Matching Addresses: To integrate these datasets together, the addresses will need to be standardized and handling abbreviations like “Street” vs “St.” is something that we may need to address.
 3. Time Inconsistencies: Since our datasets have data that trace back to almost two decades ago, older records may be less comparable to recents ones as permitting policiesa dn reporting standards could have changed over time.
-
+   
 ## Gaps
 1. Dataset Merging: We have not yet determined how the datasets with be merged together, whether it is by census area or latitude and longitude. Each options has its trade offs in terms of accuracy and completeness.
 2. Scope of Time Period: Because the data covers many years, the range of years for our analysis will depend on data volume and efficiency of data cleaning.
