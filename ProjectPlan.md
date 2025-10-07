@@ -25,4 +25,6 @@ Document the plan and timeline for implementing your project including who will 
 3. Time Inconsistencies: Since our datasets have data that trace back to almost two decades ago, older records may be less comparable to recents ones as permitting policiesa dn reporting standards could have changed over time.
 
 ## Gaps
-
+1. Dataset Merging: We have not yet determined how the datasets with be merged together, whether it is by census area or latitude and longitude. Each options has its trade offs in terms of accuracy and completeness.
+2. Scope of Time Period: Because the data covers many years, the range of years for our analysis will depend on data volume and efficiency of data cleaning.
+3. Permit Categorization: Additional reach will need to be done for us to classify and group together different permit types.
