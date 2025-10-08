@@ -9,9 +9,9 @@ Samantha will be in charge of data acquisition coding, integration, and data cle
 
 ## Datasets
 1. [Building Permits from Chicago Data Portal](https://data.cityofchicago.org/d/ydr8-5enu)  
-This dataset contains the details of all building permits within the City of Chicago. Each record includes information such as the permit number, issue date, permit type, address, latitude, longitude, and more. This dataset is important for use to understand patterns in construction activity and development in Chicago. The data is updated daily and covers data from 2006 to the present.
+This dataset contains the details of all building permits within the City of Chicago. Each record includes information such as the permit number, issue date, permit type, address, latitude, longitude, and more. This dataset is important for us to understand patterns in construction activity and development in Chicago. The data is updated daily and covers data from 2006 to the present.
 
-    We will use this building permits data set to quantify construction activity across communities and over times. It will also be good for identifying patterns in permit types and permit fees. Compared agains the building violaitons data we will be able to assess how new development or renovation trends relate to code compliance.
+    We will use this building permits data set to quantify construction activity across communities and over time. It will also be good for identifying patterns in permit types and permit fees. Compared against the building violations data, we will be able to assess how new development or renovation trends relate to code compliance.
 
 2. Building Violations from Chicago Data Portal
 
