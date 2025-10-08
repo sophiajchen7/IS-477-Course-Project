@@ -51,11 +51,15 @@ Every step in the timeline will be done with an equal split between Sophia and S
 - Tag final release on GitHub
 
 ## Constraints
-1. Missing Fields in Data: Some records have incomplete information such as incomplete addresses or missing fees which requires cleaning and could imit certain analyses.
-2. Challenge Matching Addresses: To integrate these datasets together, the addresses will need to be standardized and handling abbreviations like “Street” vs “St.” is something that we may need to address.
-3. Time Inconsistencies: Since our datasets have data that trace back to almost two decades ago, older records may be less comparable to recents ones as permitting policiesa dn reporting standards could have changed over time.
-   
+1. Missing Fields in Data: Some records have incomplete information, such as incomplete addresses or missing fees, which require cleaning and could affect certain analyses.
+2. Challenge Matching Addresses: To integrate these datasets together, the addresses will need to be standardized, and handling abbreviations like “Street” vs “St.” is something that we may need to address.
+3. Time Inconsistencies: Since our datasets have data that trace back to almost two decades ago, older records may be less comparable to recent ones as permitting policies and reporting standards could have changed over time.
+4. Large Data Volume: Both datasets contain hundreds of thousands of entries which may slow down our processing and analysis if not properly filtered.
+5. Geographic Precision: Some records lack the precise latitude and longitude coordinates which can make our spatial visualizations less accurate.
+
 ## Gaps
 1. Dataset Merging: We have not yet determined how the datasets with be merged together, whether it is by census area or latitude and longitude. Each options has its trade offs in terms of accuracy and completeness.
 2. Scope of Time Period: Because the data covers many years, the range of years for our analysis will depend on data volume and efficiency of data cleaning.
 3. Permit Categorization: Additional reach will need to be done for us to classify and group together different permit types.
+4. Quality Assessment Criteria: The specific criteria and metrics that we will be using for evaluating data quality will be determined once the data is loaded and explored.
+5. Correlation and Causality: While relationships between permits and violations can be identified, it may be challenging for us to determine whether the high violation counts are caused by new development in the area or other socioeconomic factors.
