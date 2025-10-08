@@ -16,7 +16,6 @@ This dataset contains the details of all building permits within the City of Chi
 2. Building Violations from Chicago Data Portal
 
 ## Timeline
-Document the plan and timeline for implementing your project including who will complete each task.
 <img width="700" height="250" alt="image" src="https://github.com/user-attachments/assets/1ead0bb1-601b-4f75-8550-ba22ec9584d3" />
 
 Every step in the timeline will be done with an equal split between Sophia and Samantha.
