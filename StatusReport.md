@@ -1,55 +1,49 @@
-from sodapy import Socrata
-import pandas as pd
+# Project Update By Lifestyle Task
+#### Plan: Completed
+Finalized in the project proposal with the research question:
+Is there a relationship between the number of building permits issued and the number of building violations recorded in a given neighborhood or year?
 
-client = Socrata("data.cityofchicago.org", app_token="5ah8bJgzgJRVbFDfj4VUGVz0s")
+#### Acquire: Completed
+Successfully retrieved and storedthe records for both datasets. The columns were standardized to lowercase with underscores for consistency.
 
-violations_results = client.get(
-    "22u3-xenr",
-    where="inspection_category='PERMIT'",
-    limit=50000 
-)
+#### Process: In Progress
+Both datasets were cleaned and filtered for the analysis period.
 
-violations_df = pd.DataFrame.from_records(violations_results)
-print("Violations loaded:", violations_df.shape)
+#### Analyze: In Progress
+Yearly aggregation was doing using pandas.groupby(). The results were then merged on the year column. A visualization was also created with seaborn shows trends with permit issuance increasing while violations decreasing after 2018.
 
-permits_results = client.get(
-    "ydr8-5enu",
-    limit=50000
-)
+Next step: correlation analysis and spatial trend visualization by community area.
 
-permits_df = pd.DataFrame.from_records(permits_results)
-print("Permits loaded:", permits_df.shape)
+#### Preserve: 
+- Keep the repository structured with clear folder organizations
+- Generate data dictionary
 
-violations_df.columns = violations_df.columns.str.lower().str.strip().str.replace(" ", "_")
-permits_df.columns = permits_df.columns.str.lower().str.strip().str.replace(" ", "_")
-violations_df["violation_date"] = pd.to_datetime(violations_df["violation_date"], errors="coerce")
-permits_df["issue_date"] = pd.to_datetime(permits_df["issue_date"], errors="coerce")
+#### Publish/Share
+- Write final report
+- Finalize figures and visualizations
+- Tag final release on GitHub
 
-violations_df["year"] = violations_df["violation_date"].dt.year
-permits_df["year"] = permits_df["issue_date"].dt.year
+# Updated Timeline
+| **Task** | **Status** | **Target Completion** |
+|-----------|-------------|------------------------|
+| Plan | Completed | Oct 7 |
+| Acquire | Completed | Nov 12 |
+| Process | In Progress| Nov 20 |
+| Analyze | In Progress| Nov 20 |
+| Preserve | Waiting| Dec 10 |
+| Publish/Share | Waiting| Dec 10 |
 
-violations_df = violations_df[violations_df["year"] >= 2015]
-permits_df = permits_df[permits_df["year"] >= 2015]
+# Changes to Project Plan
+- Incorporated clearer division of roles per feedback — Sophia leads documentation, reproducibility, Samantha leads data engineering and integration
+- Expanded analysis scope to include geographic trends instead of only by year
 
+# Team Member Contributions
+Sophia Chen
+- Retrieved both datasets via the Socrata API
+- Developed the basics of the cleaning, merging, and visualization scripts
+- Created documentation and structured repository organization
 
-for col in ["latitude", "longitude", "community_area"]:
-    if col in permits_df.columns:
-        permits_df[col] = pd.to_numeric(permits_df[col], errors="coerce")
-    if col in violations_df.columns:
-        violations_df[col] = pd.to_numeric(violations_df[col], errors="coerce")
-
-permits_summary = (
-    permits_df.groupby("year")
-    .size()
-    .reset_index(name="num_permits")
-)
-
-violations_summary = (
-    violations_df.groupby("year")
-    .size()
-    .reset_index(name="num_violations")
-)
-
-merged_df = pd.merge(permits_summary, violations_summary, on="year", how="inner")
-print("\nMerged data (first few rows):")
-print(merged_df.head())
+Samantha Mean
+- Identified and verified the Socrata datasets from the Chicago Data Portal
+- Helped define the API access and filtering strategy
+- Assisted with integration planning
