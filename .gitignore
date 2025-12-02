@@ -1,0 +1,21 @@
+# Virtual environments
+venv/
+.venv/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Raw + processed data (TA downloads from Box instead)
+data/raw/
+data/processed/
+
+# Results (TA downloads from Box)
+results/
+
+# API tokens or secrets
+.env
