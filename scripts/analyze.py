@@ -1,121 +1,122 @@
-import os
 import pandas as pd
-import matplotlib.pyplot as plt
+import geopandas as gpd
 import seaborn as sns
+import matplotlib.pyplot as plt
+from pathlib import Path
 
-PROC_DIR = "data/processed"
-PLOTS_DIR = "results/plots"
-
-def save_plot(fig, path):
-    os.makedirs(PLOTS_DIR, exist_ok=True)
-    fig.savefig(path, dpi=300, bbox_inches="tight")
+def save_plot(fig, filename):
+    Path("results/plots").mkdir(parents=True, exist_ok=True)
+    fig.savefig(f"results/plots/{filename}", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 def main():
-    os.makedirs(PLOTS_DIR, exist_ok=True)
+    merged = pd.read_csv("data/processed/merged_counts.csv")
 
-    merged_path = os.path.join(PROC_DIR, "merged.csv")
-    df = pd.read_csv(merged_path)
+    violations = pd.read_csv("data/processed/violations_with_ca.csv")
+    permits = pd.read_csv("data/processed/permits_with_ca.csv")
 
-    df["issue_date"] = pd.to_datetime(df["issue_date"], errors="coerce")
-    df["violation_date"] = pd.to_datetime(df["violation_date"], errors="coerce")
+    violations["VIOLATION DATE"] = pd.to_datetime(violations["VIOLATION DATE"], errors="coerce")
+    permits["ISSUE_DATE"] = pd.to_datetime(permits["ISSUE_DATE"], errors="coerce")
 
-    df["issue_year"] = df["issue_date"].dt.year
-    df["violation_year"] = df["violation_date"].dt.year
+    violations["year"] = violations["VIOLATION DATE"].dt.year
+    permits["year"] = permits["ISSUE_DATE"].dt.year
 
-    # line plot of permits per year
-    permits_year = df.groupby("issue_year").size()
-    fig1 = plt.figure()
-    permits_year.plot(kind="line", marker="o")
-    plt.title("Number of Permits per Year")
-    plt.xlabel("Year")
-    plt.ylabel("Count")
-    save_plot(fig1, f"{PLOTS_DIR}/permits_per_year.png")
-
-    # line plot of violations per year 
-    violations_year = df.groupby("violation_year").size()
-    fig2 = plt.figure()
-    violations_year.plot(kind="line", marker="o", color="red")
-    plt.title("Number of Violations per Year")
-    plt.xlabel("Year")
-    plt.ylabel("Count")
-    save_plot(fig2, f"{PLOTS_DIR}/violations_per_year.png")
-
-    # top 20 streets with most permits & violations
-    top_permits = df["street_name"].value_counts().head(20)
-    top_violations = df["street_name"].value_counts().head(20)
-
-    fig3, ax = plt.subplots(figsize=(10, 6))
-    top_permits.plot(kind="bar", ax=ax, color="blue", alpha=0.7)
-    plt.title("Top 20 Streets by Number of Permits")
-    plt.xlabel("Street")
-    plt.ylabel("Count")
-    plt.xticks(rotation=75)
-    save_plot(fig3, f"{PLOTS_DIR}/top20_permits_streets.png")
-
-    fig4, ax = plt.subplots(figsize=(10, 6))
-    top_violations.plot(kind="bar", ax=ax, color="orange", alpha=0.7)
-    plt.title("Top 20 Streets by Number of Violations")
-    plt.xlabel("Street")
-    plt.ylabel("Count")
-    plt.xticks(rotation=75)
-    save_plot(fig4, f"{PLOTS_DIR}/top20_violations_streets.png")
-
-    # scatterplot of permits vs violations by year
-    combined = pd.DataFrame({
-        "permits": permits_year,
-        "violations": violations_year
-    }).dropna()
-
-    fig5 = plt.figure()
-    sns.scatterplot(x="permits", y="violations", data=combined)
-    plt.title("Scatter Plot: Permits vs Violations by Year")
-    save_plot(fig5, f"{PLOTS_DIR}/scatter_permits_violations.png")
-
-    # Heatmap 
-    fig6 = plt.figure()
-    sns.heatmap(combined.corr(), annot=True)
-    plt.title("Correlation Between Permits and Violations")
-    save_plot(fig6, f"{PLOTS_DIR}/correlation_heatmap.png")
-
-    # combined top 20 streets 
-    permits_counts = df["street_name"].value_counts()
-    violations_counts = df["street_name"].value_counts()
-
-    combined_streets = pd.DataFrame({
-        "permits": permits_counts,
-        "violations": violations_counts
-    }).fillna(0)
-
-    combined_streets["total"] = combined_streets["permits"] + combined_streets["violations"]
-    top20_combined = combined_streets.sort_values("total", ascending=False).head(20)
-
-    fig7, ax = plt.subplots(figsize=(12, 7))
-    width = 0.4
-    x = range(len(top20_combined))
-
-    ax.bar(
-        [p - width/2 for p in x],
-        top20_combined["permits"],
-        width=width,
-        label="Permits",
-        color="steelblue"
+    viol_counts = (
+        violations.groupby(["community_area", "year"])
+        .size()
+        .reset_index(name="violations")
     )
-    ax.bar(
-        [p + width/2 for p in x],
-        top20_combined["violations"],
-        width=width,
-        label="Violations",
-        color="orange"
+    permit_counts = (
+        permits.groupby(["community_area", "year"])
+        .size()
+        .reset_index(name="permits")
     )
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(top20_combined.index, rotation=75, ha="right")
-    ax.set_ylabel("Count")
-    ax.set_title("Top 20 Streets by Combined Permits + Violations")
-    ax.legend()
+    # Heatmap of Violations (Community Area × Year)
+    pivot_viol = viol_counts.pivot(index="community_area", columns="year", values="violations")
 
-    save_plot(fig7, f"{PLOTS_DIR}/top20_combined_permits_violations.png")
+    fig1 = plt.figure(figsize=(14, 8))
+    sns.heatmap(pivot_viol, cmap="viridis")
+    plt.title("Heatmap of Violations by Community Area and Year")
+    plt.xlabel("Year")
+    plt.ylabel("Community Area")
+    save_plot(fig1, "violations_heatmap.png")
+
+    # Line Plot – Top 10 Community Areas by Violations
+    top10_viol = viol_counts.groupby("community_area")["violations"].sum().nlargest(10).index
+
+    fig2 = plt.figure(figsize=(12, 6))
+    sns.lineplot(
+        data=viol_counts[viol_counts["community_area"].isin(top10_viol)],
+        x="year", y="violations", hue="community_area", marker="o"
+    )
+    plt.title("Violations Over Time for Top 10 Community Areas")
+    plt.xlabel("Year")
+    plt.ylabel("Violations")
+    save_plot(fig2, "top10_violations_trend.png")
+
+    # Line Plot – Top 10 Community Areas by Permits
+    top10_perm = permit_counts.groupby("community_area")["permits"].sum().nlargest(10).index
+
+    fig3 = plt.figure(figsize=(12, 6))
+    sns.lineplot(
+        data=permit_counts[permit_counts["community_area"].isin(top10_perm)],
+        x="year", y="permits", hue="community_area", marker="o"
+    )
+    plt.title("Permits Over Time for Top 10 Community Areas")
+    plt.xlabel("Year")
+    plt.ylabel("Permits")
+    save_plot(fig3, "top10_permits_trend.png")
+
+    # Correlation Heatmap (Year, Permits, Violations)
+    fig4 = plt.figure(figsize=(6, 4))
+    sns.heatmap(
+        merged[["year", "permits", "violations"]].corr(),
+        annot=True, cmap="coolwarm"
+    )
+    plt.title("Correlation Matrix: Year, Permits, Violations")
+    save_plot(fig4, "correlation_matrix.png")
+
+    # Side-by-Side Maps (Violations, Permits)
+    community_url = "https://data.cityofchicago.org/resource/igwz-8jzy.geojson"
+    community_gdf = gpd.read_file(community_url)[["community", "area_numbe", "geometry"]]
+    community_gdf = community_gdf.rename(columns={
+        "community": "community_name",
+        "area_numbe": "community_area"
+    })
+
+    viol_total = viol_counts.groupby("community_area")["violations"].sum().reset_index()
+    perm_total = permit_counts.groupby("community_area")["permits"].sum().reset_index()
+
+    community_gdf["community_area"] = community_gdf["community_area"].astype(int)
+    viol_total["community_area"] = viol_total["community_area"].astype(int)
+    perm_total["community_area"] = perm_total["community_area"].astype(int)
+
+    viol_map = community_gdf.merge(viol_total, on="community_area", how="left").fillna(0)
+    perm_map = community_gdf.merge(perm_total, on="community_area", how="left").fillna(0)
+
+    fig5, axes = plt.subplots(1, 2, figsize=(20, 10))
+
+    viol_map.plot(column="violations", cmap="Reds", linewidth=0.5, edgecolor="black",
+                  legend=True, ax=axes[0])
+    axes[0].set_title("Violations by Community Area")
+    axes[0].axis("off")
+
+    perm_map.plot(column="permits", cmap="Blues", linewidth=0.5, edgecolor="black",
+                  legend=True, ax=axes[1])
+    axes[1].set_title("Permits by Community Area")
+    axes[1].axis("off")
+
+    save_plot(fig5, "violations_vs_permits_map.png")
+
+    # Boxplot – Violations by Year
+    fig6 = plt.figure(figsize=(10, 5))
+    sns.boxplot(data=viol_counts, x="year", y="violations")
+    plt.title("Distribution of Violations by Year")
+    plt.xticks(rotation=45)
+    save_plot(fig6, "violations_boxplot.png")
+
+    print("Analysis complete! All plots saved to results/plots/")
 
 if __name__ == "__main__":
     main()

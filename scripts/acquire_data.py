@@ -1,34 +1,25 @@
-import os
-import pandas as pd
-from sodapy import Socrata
+import requests
+from pathlib import Path
 
-PERMITS_ID = "ydr8-5enu"
-VIOLATIONS_ID = "22u3-xenr"
+def download_csv(url, path, limit=1000):
+    params = {"$limit": limit}
+    response = requests.get(url, params=params)
+    response.raise_for_status()
 
-LIMIT = 200000 
-
-def get_client():
-    """
-    Creates a Socrata client using an environment variable for the APP TOKEN.
-    """
-    app_token = os.environ.get("CHICAGO_APP_TOKEN") 
-    return Socrata("data.cityofchicago.org", app_token)
-
-def download_dataset(dataset_id: str, path: str):
-    """
-    Downloads a dataset from Chicago Data Portal and saves it as CSV.
-    """
-    client = get_client()
-    print(f"Downloading {dataset_id} .. .")
-    results = client.get(dataset_id, limit=LIMIT)
-    df = pd.DataFrame.from_records(results)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    df.to_csv(path, index=False)
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "wb") as f:
+        f.write(response.content)
     print(f"Saved → {path}")
 
 def main():
-    download_dataset(PERMITS_ID, "data/raw/permits_raw.csv")
-    download_dataset(VIOLATIONS_ID, "data/raw/violations_raw.csv")
+    violations_url = "https://data.cityofchicago.org/api/views/22u3-xenr/rows.csv"
+    permits_url = "https://data.cityofchicago.org/api/views/ydr8-5enu/rows.csv"
+
+    download_csv(violations_url, "data/raw/violations.csv")
+    download_csv(permits_url, "data/raw/permits.csv")
+
+    # community areas GeoJSON will download later directly in clean_data
+    print("Data acquisition complete.")
 
 if __name__ == "__main__":
     main()

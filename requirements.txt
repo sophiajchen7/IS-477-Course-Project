@@ -4,3 +4,4 @@ seaborn
 sodapy
 snakemake
 python-dotenv
+geopandas

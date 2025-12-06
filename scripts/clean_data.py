@@ -1,58 +1,45 @@
-import os
 import pandas as pd
+import geopandas as gpd
+from pathlib import Path
+from shapely.geometry import Point
 
-RAW_DIR = "data/raw"
-PROC_DIR = "data/processed"
-
-def clean_permits(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df.columns = df.columns.str.lower()
-
-    # Convert dates
-    if "issue_date" in df.columns:
-        df["issue_date"] = pd.to_datetime(df["issue_date"], errors="coerce")
-
-    # Normalize street names if present
-    if "street_name" in df.columns:
-        df["street_name"] = (
-            df["street_name"]
-            .astype(str)
-            .str.strip()
-            .str.upper()
-        )
-
-    return df
-
-def clean_violations(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    df.columns = df.columns.str.lower()
-
-    if "violation_date" in df.columns:
-        df["violation_date"] = pd.to_datetime(df["violation_date"], errors="coerce")
-
-    if "street_name" in df.columns:
-        df["street_name"] = (
-            df["street_name"]
-            .astype(str)
-            .str.strip()
-            .str.upper()
-        )
-
-    return df
+def assign_community_area(df, community_gdf, lat_col, lon_col):
+    df = df.dropna(subset=[lat_col, lon_col])
+    gdf = gpd.GeoDataFrame(
+        df,
+        geometry=gpd.points_from_xy(df[lon_col], df[lat_col]),
+        crs="EPSG:4326"
+    )
+    joined = gpd.sjoin(gdf, community_gdf, how="left", predicate="within")
+    return joined.drop(columns=["index_right"])
 
 def main():
-    os.makedirs(PROC_DIR, exist_ok=True)
+    Path("data/processed").mkdir(parents=True, exist_ok=True)
 
-    permits = pd.read_csv(os.path.join(RAW_DIR, "permits_raw.csv"))
-    violations = pd.read_csv(os.path.join(RAW_DIR, "violations_raw.csv"))
+    # Load raw datasets
+    violations = pd.read_csv("data/raw/violations.csv")
+    permits = pd.read_csv("data/raw/permits.csv")
 
-    permits_clean = clean_permits(permits)
-    violations_clean = clean_violations(violations)
+    # Load community area boundaries
+    community_url = "https://data.cityofchicago.org/resource/igwz-8jzy.geojson"
+    community_gdf = gpd.read_file(community_url)[["community", "area_numbe", "geometry"]]
+    community_gdf = community_gdf.rename(columns={
+        "community": "community_name",
+        "area_numbe": "community_area"
+    })
 
-    permits_clean.to_csv(os.path.join(PROC_DIR, "permits_clean.csv"), index=False)
-    violations_clean.to_csv(os.path.join(PROC_DIR, "violations_clean.csv"), index=False)
+    # Assign community areas
+    viol_ca = assign_community_area(
+        violations, community_gdf, lat_col="LATITUDE", lon_col="LONGITUDE"
+    )
+    perm_ca = assign_community_area(
+        permits, community_gdf, lat_col="LATITUDE", lon_col="LONGITUDE"
+    )
 
-    print("Cleaned files saved to data/processed/")
+    # Save intermediate
+    viol_ca.to_csv("data/processed/violations_with_ca.csv", index=False)
+    perm_ca.to_csv("data/processed/permits_with_ca.csv", index=False)
+    print("Cleaned data with community areas saved.")
 
 if __name__ == "__main__":
     main()
